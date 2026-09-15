@@ -22,6 +22,8 @@ npm install @zachleat/table-of-contents
 
 Child content is kept and the list is added after it. Wrap it in a labeled `<nav>` so assistive technology can find it. The element is hidden when no headings match.
 
+A child `<ol>` or `<ul>` (for example, server-rendered) is used instead of generating one, and its `#` links are highlighted for headings matching `selector`.
+
 Add `?nodefine` to skip auto-registration and define it yourself:
 
 ```js

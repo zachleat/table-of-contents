@@ -90,23 +90,30 @@ export class TableOfContents extends HTMLElement {
 		let selector = this.getAttribute("selector") || TableOfContents.defaults.selector;
 		let headings = Array.from(document.querySelectorAll(selector)).filter(h => !this.contains(h));
 
-		// Existing child content is kept before the list.
-		this.list?.remove();
-		this.list = undefined;
 		this.observer?.disconnect();
+		this.generatedList?.remove();
+		this.generatedList = undefined;
+
+		// A child list (e.g. server-rendered) is used as-is.
+		this.list = this.querySelector(":scope > :is(ol, ul)");
 
 		// Hide when empty, without overriding an author-set `hidden`.
+		let empty = !this.list && headings.length === 0;
 		if(this.hiddenWhenEmpty) {
 			this.hidden = false;
 		}
-		this.hiddenWhenEmpty = headings.length === 0 && !this.hidden;
-		if(headings.length === 0) {
+		this.hiddenWhenEmpty = empty && !this.hidden;
+		if(empty) {
 			this.hidden = true;
 			return;
 		}
 
-		this.list = TableOfContents.generate(headings);
-		this.append(this.list);
+		// Existing child content is kept before the generated list.
+		if(!this.list) {
+			this.list = this.generatedList = TableOfContents.generate(headings);
+			this.append(this.list);
+		}
+
 		this.observe(headings);
 	}
 

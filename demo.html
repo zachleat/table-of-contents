@@ -10,11 +10,11 @@
 	body { font-family: system-ui, sans-serif; line-height: 1.5; margin: 0; }
 	.demo { max-width: 60em; margin: 0 auto; padding: 1em; display: grid; grid-template-columns: 1fr 14em; gap: 2em; }
 	main p { min-height: 40vh; }
-	.demo-toc { position: sticky; top: 1em; align-self: start; }
+	.demo-toc { position: sticky; top: 1em; align-self: start; nav { margin-block-end: 2em; } }
 	.demo-subhed { font-weight: 600; text-transform: uppercase; margin: 0 0 .5em; font-size: 0.875em; letter-spacing: 0.07142857142857em; }
 
 	/* Demo styles */
-	:where(table-of-contents):not(:defined) {
+	:where(table-of-contents):not(:defined, :has(> :is(ol, ul))) {
 		/* Hide pre-JS */
 		display: none;
 	}
@@ -29,11 +29,13 @@
 		li {
 			padding: .125em .3125em;
 		}
-
+		li:not(:has(a[href])) {
+			font-style: italic;
+			opacity: .6;
+		}
 		.toc-in-view {
 			font-weight: 700;
 		}
-
 		li:has(.toc-in-view) {
 			background-color: light-dark(#f5f5f5, #333);
 		}
@@ -85,11 +87,23 @@
 		<h2 id="end">The end</h2>
 		<p>Lorem ipsum.</p>
 	</main>
-	<nav class="demo-toc" aria-labelledby="toc-title">
-		<table-of-contents selector="main :is(h2, h3, h4)">
-			<div class="demo-subhed" id="toc-title">Table of Contents</div>
-		</table-of-contents>
-	</nav>
+	<aside class="demo-toc">
+		<nav aria-labelledby="toc-title">
+			<table-of-contents selector="main :is(h2, h3, h4)">
+				<div class="demo-subhed" id="toc-title">Table of Contents</div>
+			</table-of-contents>
+		</nav>
+		<nav aria-labelledby="toc-ssr-title">
+			<table-of-contents selector="main h2">
+				<div class="demo-subhed" id="toc-ssr-title">Server-rendered Table of Contents</div>
+				<ol>
+					<li><a href="#intro">Introduction</a></li>
+					<li><a href="#styling">Styling</a></li>
+					<li><a href="#end">The end</a></li>
+				</ol>
+			</table-of-contents>
+		</nav>
+	</aside>
 </div>
 </body>
 </html>
