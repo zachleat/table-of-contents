@@ -1,6 +1,6 @@
 # `<table-of-contents>`
 
-A zero-dependency web component that client renders a table of contents from the headings on the page and highlights the sections currently in view.
+A zero-dependency web component that progressively enhances (or optionally client renders) a table of contents from the headings on the page and highlights visible sections. This component includes no styles (all visuals are app-code controlled).
 
 ## Installation
 
