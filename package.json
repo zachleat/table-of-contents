@@ -1,0 +1,29 @@
+{
+  "name": "@zachleat/table-of-contents",
+  "version": "1.0.0",
+  "description": "A zero-dependency web component that client renders a table of contents from the headings on the page.",
+  "type": "module",
+  "main": "table-of-contents.js",
+  "exports": {
+    ".": "./table-of-contents.js",
+    "./table-of-contents.js": "./table-of-contents.js"
+  },
+  "files": [
+    "table-of-contents.js"
+  ],
+  "keywords": [
+    "web-components",
+    "custom-elements",
+    "table-of-contents"
+  ],
+  "author": "Zach Leatherman",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachleat/table-of-contents.git"
+  },
+  "homepage": "https://github.com/zachleat/table-of-contents#readme",
+  "bugs": {
+    "url": "https://github.com/zachleat/table-of-contents/issues"
+  }
+}

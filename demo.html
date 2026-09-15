@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>table-of-contents demo</title>
+	<script type="module" src="table-of-contents.js"></script>
+	<style>
+	:root { color-scheme: light dark; }
+	body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 60em; margin: 0 auto; padding: 1em; display: grid; grid-template-columns: 1fr 14em; gap: 2em; }
+	main p { min-height: 40vh; }
+	nav { position: sticky; top: 1em; align-self: start; }
+	.demo-subhed { font-weight: 600; text-transform: uppercase; margin: 0 0 .5em; font-size: 0.875em; letter-spacing: 0.07142857142857em; }
+
+	/* Demo styles */
+	:where(table-of-contents):not(:defined) {
+		/* Hide pre-JS */
+		display: none;
+	}
+	:where(table-of-contents) :is(ul, ol) {
+		list-style: "";
+		margin: 0;
+		padding: 0;
+
+		:is(ul, ol) {
+			padding-inline-start: .75em;
+		}
+		li {
+			padding: .125em .3125em;
+		}
+
+		.toc-in-view {
+			font-weight: 700;
+		}
+
+		li:has(.toc-in-view) {
+			background-color: light-dark(#f5f5f5, #333);
+		}
+	}
+	</style>
+</head>
+<body>
+	<main>
+		<h1>Demo</h1>
+		<h2 id="intro">Introduction</h2>
+		<p>Lorem ipsum.</p>
+		<h3 id="setup">Setup with <code>npm</code></h3>
+		<p>Lorem ipsum.</p>
+		<h4 id="deep">Deeply nested</h4>
+		<p>Lorem ipsum.</p>
+		<h3 id="usage"><a href="#usage">Usage &amp; options</a></h3>
+		<p>Lorem ipsum.</p>
+		<h3 id="plugins">Using <a href="https://www.11ty.dev/">Eleventy</a> plugins</h3>
+		<p>Lorem ipsum.</p>
+		<h2 id="styling">Styling <a href="#styling" aria-hidden="true">#</a></h2>
+		<p>Lorem ipsum.</p>
+		<h4 id="skipped">Skipped a level</h4>
+		<p>Lorem ipsum.</p>
+		<h3>No id, no link</h3>
+		<p>Lorem ipsum.</p>
+		<h2 id="end">The end</h2>
+		<p>Lorem ipsum.</p>
+	</main>
+	<nav aria-labelledby="toc-title">
+		<table-of-contents selector="main :is(h2, h3, h4)">
+			<div class="demo-subhed" id="toc-title">Table of Contents</div>
+		</table-of-contents>
+	</nav>
+</body>
+</html>
