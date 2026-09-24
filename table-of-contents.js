@@ -26,7 +26,12 @@ export class TableOfContents extends HTMLElement {
 		return text.replace(/\s+/g, " ");
 	}
 
-	static generate(headings) {
+	static isVisible(heading) {
+		return heading.checkVisibility?.() ?? true;
+	}
+
+	// `items` (optional) receives each generated <li> mapped to its heading.
+	static generate(headings, items) {
 		let root = document.createElement("ol");
 		let stack = [{ level: this.getLevel(headings[0]), list: root }];
 		for(let heading of headings) {
@@ -65,6 +70,7 @@ export class TableOfContents extends HTMLElement {
 			}
 
 			top.list.append(top.item);
+			items?.set(top.item, heading);
 		}
 
 		return root;
@@ -80,6 +86,18 @@ export class TableOfContents extends HTMLElement {
 
 	disconnectedCallback() {
 		this.observer?.disconnect();
+		this.resizeObserver?.disconnect();
+	}
+
+	// Hides the element without overriding an author-set `hidden`.
+	setAutoHidden(force) {
+		if(this.autoHidden) {
+			this.hidden = false;
+		}
+		this.autoHidden = force && !this.hidden;
+		if(force) {
+			this.hidden = true;
+		}
 	}
 
 	init() {
@@ -91,30 +109,61 @@ export class TableOfContents extends HTMLElement {
 		let headings = Array.from(document.querySelectorAll(selector)).filter(h => !this.contains(h));
 
 		this.observer?.disconnect();
+		this.resizeObserver?.disconnect();
 		this.generatedList?.remove();
 		this.generatedList = undefined;
 
 		// A child list (e.g. server-rendered) is used as-is.
 		this.list = this.querySelector(":scope > :is(ol, ul)");
 
-		// Hide when empty, without overriding an author-set `hidden`.
 		let empty = !this.list && headings.length === 0;
-		if(this.hiddenWhenEmpty) {
-			this.hidden = false;
-		}
-		this.hiddenWhenEmpty = empty && !this.hidden;
+		this.setAutoHidden(empty);
 		if(empty) {
-			this.hidden = true;
 			return;
 		}
 
-		// Existing child content is kept before the generated list.
-		if(!this.list) {
-			this.list = this.generatedList = TableOfContents.generate(headings);
+		let items = new Map();
+		if(this.list) {
+			for(let heading of headings) {
+				if(heading.id) {
+					for(let link of this.list.querySelectorAll(`a[href="#${CSS.escape(heading.id)}"]`)) {
+						items.set(link.closest("li"), heading);
+					}
+				}
+			}
+			items.delete(null);
+		} else {
+			// Existing child content is kept before the generated list.
+			this.list = this.generatedList = TableOfContents.generate(headings, items);
 			this.append(this.list);
 		}
 
 		this.observe(headings);
+		this.observeVisibility(headings, items);
+	}
+
+	// Hides entries for headings hidden by CSS (e.g. `display: none` on an ancestor).
+	observeVisibility(headings, items) {
+		let update = () => {
+			let visible = new Map(headings.map(h => [h, TableOfContents.isVisible(h)]));
+
+			// Reverse order so nested entries are updated before their parents.
+			for(let li of Array.from(this.list.querySelectorAll("li")).reverse()) {
+				let heading = items.get(li);
+				if(heading) {
+					li.hidden = !visible.get(heading) && !li.querySelector("li:not([hidden])");
+				}
+			}
+
+			this.setAutoHidden(headings.length > 0 && !headings.some(h => visible.get(h)));
+		};
+
+		update();
+
+		this.resizeObserver = new ResizeObserver(update);
+		for(let heading of headings) {
+			this.resizeObserver.observe(heading);
+		}
 	}
 
 	// A heading is active while it or any content before the next heading is visible.

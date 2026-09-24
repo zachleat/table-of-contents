@@ -89,6 +89,7 @@
 		<p>Lorem ipsum.</p>
 	</main>
 	<aside class="demo-toc">
+		<p><button type="button" id="toggle-heading" aria-pressed="false">Hide “The end” heading</button></p>
 		<nav aria-labelledby="toc-title">
 			<table-of-contents selector="main :is(h2, h3, h4)">
 				<div class="demo-subhed" id="toc-title">Table of Contents</div>
@@ -106,5 +107,12 @@
 		</nav>
 	</aside>
 </div>
+<script>
+document.getElementById("toggle-heading").addEventListener("click", e => {
+	let heading = document.getElementById("end");
+	heading.hidden = !heading.hidden;
+	e.target.setAttribute("aria-pressed", heading.hidden);
+});
+</script>
 </body>
 </html>
