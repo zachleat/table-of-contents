@@ -43,3 +43,7 @@ TableOfContents.define("my-toc");
 ## Styling
 
 No styles are included. Links for sections in view get the `toc-in-view` class.
+
+# Changelog
+
+- `v2.0.0` tracks display of heading elements (and hides links when display is toggled off)
