@@ -11,6 +11,7 @@
 	.demo { max-width: 60em; margin: 0 auto; padding: 1em; display: grid; grid-template-columns: 1fr 14em; gap: 2em; }
 	main p { min-height: 40vh; }
 	.demo-toc { position: sticky; top: 1em; align-self: start; nav { margin-block-end: 2em; } }
+	.demo-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(12em, 1fr)); gap: 1em; margin-block-end: 1em; fieldset { margin: 0; } label { display: block; } }
 	.demo-subhed { font-weight: 600; text-transform: uppercase; margin: 0 0 .5em; font-size: 0.875em; letter-spacing: 0.07142857142857em; }
 
 	/* Demo styles */
@@ -69,6 +70,18 @@
 
 <div class="demo" id="demo">
 	<main>
+		<div class="demo-controls">
+			<fieldset id="toggle-best-match">
+				<legend>Highlight</legend>
+				<label><input type="radio" name="best-match" value="" checked> All visible sections</label>
+				<label><input type="radio" name="best-match" value="1"> Best match</label>
+			</fieldset>
+			<fieldset id="toggle-heading">
+				<legend>“The end” heading</legend>
+				<label><input type="radio" name="end-heading" value="" checked> Shown</label>
+				<label><input type="radio" name="end-heading" value="1"> Hidden</label>
+			</fieldset>
+		</div>
 		<h2 id="intro">Introduction</h2>
 		<p>Lorem ipsum.</p>
 		<h3 id="setup">Setup with <code>npm</code></h3>
@@ -89,9 +102,8 @@
 		<p>Lorem ipsum.</p>
 	</main>
 	<aside class="demo-toc">
-		<p><button type="button" id="toggle-heading" aria-pressed="false">Hide “The end” heading</button></p>
 		<nav aria-labelledby="toc-title">
-			<table-of-contents selector="main :is(h2, h3, h4)">
+			<table-of-contents selector="main :is(h2, h3, h4)" id="toc-main">
 				<div class="demo-subhed" id="toc-title">Table of Contents</div>
 			</table-of-contents>
 		</nav>
@@ -108,10 +120,14 @@
 	</aside>
 </div>
 <script>
-document.getElementById("toggle-heading").addEventListener("click", e => {
-	let heading = document.getElementById("end");
-	heading.hidden = !heading.hidden;
-	e.target.setAttribute("aria-pressed", heading.hidden);
+document.getElementById("toggle-heading").addEventListener("change", e => {
+	document.getElementById("end").hidden = !!e.target.value;
+});
+document.getElementById("toggle-best-match").addEventListener("change", e => {
+	let toc = document.getElementById("toc-main");
+	toc.toggleAttribute("best-match", !!e.target.value);
+	// The component reads `best-match` on init.
+	toc.init();
 });
 </script>
 </body>

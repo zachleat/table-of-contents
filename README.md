@@ -39,7 +39,7 @@ TableOfContents.define("my-toc");
 ## Attributes
 
 - `selector`: headings to include (default `main :is(h2, h3, h4, h5, h6)`). Headings without an `id` are listed without a link.
-- `best-match`: when multiple sections are in view, highlight only the one taking up the most vertical space in the viewport.
+- `best-match`: highlight only the section crossing a reading line 25% down the viewport.
 
 ## Styling
 

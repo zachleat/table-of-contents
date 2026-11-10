@@ -86,6 +86,7 @@ export class TableOfContents extends HTMLElement {
 
 	disconnectedCallback() {
 		this.observer?.disconnect();
+		this.scrollController?.abort();
 		this.resizeObserver?.disconnect();
 	}
 
@@ -169,39 +170,47 @@ export class TableOfContents extends HTMLElement {
 	// A heading is active while it or any content before the next heading is visible.
 	observe(headings) {
 		this.observer?.disconnect();
+		this.scrollController?.abort();
 
 		let headingSet = new Set(headings);
 		let targets = new Map();
-		let visible = new Map();
+		let visible = new Set();
 		let bestMatch = this.hasAttribute("best-match");
+		let current;
+		let atBottom = false;
+
+		let render = activeIds => {
+			for(let link of this.list.querySelectorAll("a[href^='#']")) {
+				let id = link.getAttribute("href").slice(1);
+				link.classList.toggle(TableOfContents.defaults.activeClass, activeIds.has(id));
+			}
+		};
+
+		let renderBestMatch = () => {
+			// Short final sections may never reach the reading line, so the last visible one wins at the bottom of the page.
+			let id = atBottom ? headings.findLast(h => h.id && TableOfContents.isVisible(h))?.id : current;
+			render(new Set(id ? [id] : []));
+		};
 
 		this.observer = new IntersectionObserver(entries => {
 			for(let entry of entries) {
 				if(entry.isIntersecting) {
-					visible.set(entry.target, entry.intersectionRect.height);
+					visible.add(entry.target);
 				} else {
 					visible.delete(entry.target);
 				}
 			}
 
-			let heights = new Map();
-			for(let [el, height] of visible) {
-				let id = targets.get(el);
-				heights.set(id, (heights.get(id) || 0) + height);
+			let activeIds = new Set(Array.from(visible, el => targets.get(el)));
+			if(bestMatch) {
+				// Keeps the previous match while the reading line sits in a gap between elements.
+				current = headings.findLast(h => activeIds.has(h.id))?.id ?? current;
+				renderBestMatch();
+			} else {
+				render(activeIds);
 			}
-
-			let activeIds = new Set(heights.keys());
-			if(bestMatch && activeIds.size > 1) {
-				// Ties go to the earlier heading.
-				let best = headings.map(h => h.id).filter(id => heights.has(id)).reduce((a, b) => heights.get(b) > heights.get(a) ? b : a);
-				activeIds = new Set([best]);
-			}
-
-			for(let link of this.list.querySelectorAll("a[href^='#']")) {
-				let id = link.getAttribute("href").slice(1);
-				link.classList.toggle(TableOfContents.defaults.activeClass, activeIds.has(id));
-			}
-		}, bestMatch ? { threshold: Array.from({ length: 21 }, (_, i) => i / 20) } : undefined);
+		// A zero-height root at 25% of the viewport acts as the reading line.
+		}, bestMatch ? { rootMargin: "-25% 0px -75% 0px" } : undefined);
 
 		for(let heading of headings) {
 			if(!heading.id) {
@@ -213,6 +222,22 @@ export class TableOfContents extends HTMLElement {
 				targets.set(el, heading.id);
 				this.observer.observe(el);
 			} while((el = el.nextElementSibling) && !headingSet.has(el));
+		}
+
+		if(bestMatch) {
+			this.scrollController = new AbortController();
+			let checkBottom = () => {
+				let { scrollY, innerHeight } = window;
+				let bottom = scrollY > 0 && innerHeight + scrollY >= document.documentElement.scrollHeight - 1;
+				if(bottom !== atBottom) {
+					atBottom = bottom;
+					renderBestMatch();
+				}
+			};
+			let options = { passive: true, signal: this.scrollController.signal };
+			window.addEventListener("scroll", checkBottom, options);
+			window.addEventListener("resize", checkBottom, options);
+			checkBottom();
 		}
 	}
 }
