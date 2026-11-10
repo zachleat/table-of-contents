@@ -172,19 +172,36 @@ export class TableOfContents extends HTMLElement {
 
 		let headingSet = new Set(headings);
 		let targets = new Map();
-		let visible = new Set();
+		let visible = new Map();
+		let bestMatch = this.hasAttribute("best-match");
 
 		this.observer = new IntersectionObserver(entries => {
 			for(let entry of entries) {
-				visible[entry.isIntersecting ? "add" : "delete"](entry.target);
+				if(entry.isIntersecting) {
+					visible.set(entry.target, entry.intersectionRect.height);
+				} else {
+					visible.delete(entry.target);
+				}
 			}
 
-			let activeIds = new Set(Array.from(visible, el => targets.get(el)));
+			let heights = new Map();
+			for(let [el, height] of visible) {
+				let id = targets.get(el);
+				heights.set(id, (heights.get(id) || 0) + height);
+			}
+
+			let activeIds = new Set(heights.keys());
+			if(bestMatch && activeIds.size > 1) {
+				// Ties go to the earlier heading.
+				let best = headings.map(h => h.id).filter(id => heights.has(id)).reduce((a, b) => heights.get(b) > heights.get(a) ? b : a);
+				activeIds = new Set([best]);
+			}
+
 			for(let link of this.list.querySelectorAll("a[href^='#']")) {
 				let id = link.getAttribute("href").slice(1);
 				link.classList.toggle(TableOfContents.defaults.activeClass, activeIds.has(id));
 			}
-		});
+		}, bestMatch ? { threshold: Array.from({ length: 21 }, (_, i) => i / 20) } : undefined);
 
 		for(let heading of headings) {
 			if(!heading.id) {
