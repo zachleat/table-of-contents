@@ -19,10 +19,17 @@ export class TableOfContents extends HTMLElement {
 	// Ignores same-page anchor links and hidden decorations inside headings.
 	static getText(heading) {
 		let clone = heading.cloneNode(true);
+
+		// Author opt-outs are removed first so they are never restored by the fallback below.
+		for(let el of clone.querySelectorAll("[data-toc-exclude]")) {
+			el.remove();
+		}
+		let fallback = clone.textContent.trim();
+
 		for(let el of clone.querySelectorAll("a[href^='#'], button, script, style, template, [hidden], [aria-hidden='true']")) {
 			el.remove();
 		}
-		let text = clone.textContent.trim() || heading.textContent.trim();
+		let text = clone.textContent.trim() || fallback;
 		return text.replace(/\s+/g, " ");
 	}
 

@@ -40,6 +40,7 @@ TableOfContents.define("my-toc");
 
 - `selector`: headings to include (default `main :is(h2, h3, h4, h5, h6)`). Headings without an `id` are listed without a link.
 - `best-match`: highlight only the section crossing a reading line 25% down the viewport.
+- `data-toc-exclude`: add to any element inside a heading to leave it out of the generated link text.
 
 ## Styling
 
