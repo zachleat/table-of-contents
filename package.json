@@ -1,6 +1,6 @@
 {
   "name": "@zachleat/table-of-contents",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "A zero-dependency web component that progressively enhances (or optionally client renders) a table of contents from the headings on the page and highlights visible sections.",
   "type": "module",
   "main": "table-of-contents.js",
